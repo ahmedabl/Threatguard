@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThreatGuard - Phishing Detection Tool</title>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #0d1117;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+        width: 100%;
+        background: #161b22;
+        padding: 20px 0;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: bold;
+        color: #58a6ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .navbar .credit {
+        font-size: 14px;
+        color: #8b949e;
+        margin-left: 15px;
+        font-weight: normal;
+    }
+
+    /* Container */
+    .container {
+        margin-top: 130px;
+        background: #1c2128;
+        padding: 40px;
+        border-radius: 12px;
+        width: 70%;
+        max-width: 800px;
+        text-align: center;
+    }
+
+    input {
+        width: 95%;
+        padding: 14px;
+        font-size: 18px;
+        border: 2px solid #58a6ff;
+        border-radius: 8px;
+        background-color: #22272e;
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    button {
+        background-color: #238636;
+        color: white;
+        padding: 14px;
+        font-size: 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: none;
+    }
+
+    button:hover {
+        background-color: #2ea043;
+        transform: scale(1.05);
+    }
+
+    .scan-icon { font-size: 20px; }
+
+    /* Spinner */
+    .spinner {
+        display: none;
+        margin: 10px auto;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Result Styling */
+    .result-box {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 18px;
+        background-color: #161b22;
+    }
+
+    .safe { color: #3f2; }
+    .warning { color: #f5690b; }
+    .danger { color: #a31212; }
+    .phishing { color: #e5f50b; }
+    .unknown { color: #ffffff; }
+
+    /* Prompt Message */
+    #promptMessage {
+        display: none;
+        background-color: #238636;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        width: fit-content;
+        margin: 20px auto;
+        box-shadow: 0 0 10px #238636;
+    }
+
+    p.footer {
+        margin-top: 20px;
+        font-size: 12px;
+        color: gray;
+    }
+
+</style>
+
+<script>
+function showSpinner(spinnerId) {
+    document.getElementById(spinnerId).style.display = 'block';
+    setTimeout(() => {
+        document.getElementById(spinnerId).style.display = 'none';
+    }, 3000);
+}
+
+window.onload = function() {
+    const promptDiv = document.getElementById('promptMessage');
+    const message = "{{ message | safe }}";
+    const displayText = "{{ display_text | safe }}";
+
+    if (message) {
+        promptDiv.innerText = "Analysis Complete: " + message;
+        promptDiv.style.display = 'block';
+        setTimeout(() => { promptDiv.style.display = 'none'; }, 5000);
+    } else if (displayText) {
+        promptDiv.innerText = "URL Analysis Complete: " + displayText;
+        promptDiv.style.display = 'block';
+        setTimeout(() => { promptDiv.style.display = 'none'; }, 5000);
+    }
+};
+</script>
+
+</head>
+<body>
+
+<div class="navbar">
+    <h1><i class="fas fa-shield-alt"></i> ThreatGuard
+        <span class="credit">Designed by AHMED</span>
+    </h1>
+</div>
+
+<div class="container">
+    <!-- <h2><i class="fas fa-exclamation-triangle"></i> MALICIOPUS FILES</h2>
+    <form id="fileForm" action="/scam/" method="post" enctype="multipart/form-data" onsubmit="showSpinner('fileSpinner')">
+        <label><strong>Upload a file (PDF/TXT only):</strong></label><br>
+        <input type="file" name="file" required><br>
+        <button type="submit"><i class="fas fa-upload scan-icon"></i> Analyze</button>
+        <div id="fileSpinner" class="spinner"></div> -->
+    </form>
+
+    {% if message %}
+        <h3>Result:</h3>
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <h2><i class="fas fa-link"></i> PHISHING URL ANALYZER</h2>
+    <form id="urlForm" method="post" action="/predict" onsubmit="showSpinner('urlSpinner')">
+        <label>Enter URL:</label>
+        <input type="text" name="url" required>
+        <button type="submit"><i class="fas fa-search"></i> Analyze</button>
+        <div id="urlSpinner" class="spinner"></div>
+    </form>
+
+    {% if predicted_class %}
+        <div class="result-box {{ predicted_class }}">
+            <p><strong>URL:</strong> {{ input_url }}</p>
+            <p><strong>Status:</strong> {{ display_text }}</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<div id="promptMessage"></div>
+
+<p class="footer">AI-Powered Cybersecurity Tool</p>
+
+</body>
+</html>
